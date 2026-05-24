@@ -4,7 +4,7 @@ name: Docker Build (Snapshot Beats)
 # SNAPSHOT CVE report before the released-build report arrives the same day.
 on:
   schedule:
-    - cron: '0 8 * * *' # Daily at 08:00 UTC
+    - cron: '0 8 * * 1' # Weekly on Monday at 08:00 UTC
 
   # Enable manual trigger
   workflow_dispatch:
