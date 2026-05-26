@@ -86,7 +86,7 @@ jobs:
         
     - name: Login to Amazon ECR
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      uses: aws-actions/amazon-ecr-login@v2
               
     # Cache OpenSSL Build to speed up subsequent builds as fips.so should not change often.
     # --load makes the image available locally so we can extract the beats version below.
@@ -150,7 +150,7 @@ jobs:
 
     - name: Login to Amazon ECR
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      uses: aws-actions/amazon-ecr-login@v2
 
     - name: Wait for ECR enhanced scan to become ACTIVE
       env:
