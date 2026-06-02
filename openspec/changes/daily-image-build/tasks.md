@@ -7,30 +7,30 @@ secret, or repository-variable changes are required.
 
 ## 1. Schedule
 
-- [ ] 1.1 In `build.yml`, replace the single `schedule` cron `'0 10 * * 1'` with two
+- [x] 1.1 In `build.yml`, replace the single `schedule` cron `'0 10 * * 1'` with two
   non-overlapping entries, keeping the 10:00 UTC time:
   ```yaml
   schedule:
     - cron: '0 10 * * 1'      # Monday 10:00 UTC — build + scan + weekly Elastic email
     - cron: '0 10 * * 0,2-6'  # Sun, Tue–Sat 10:00 UTC — build + scan only
   ```
-- [ ] 1.2 Confirm the two crons do not overlap (no day matches both) so Monday fires
+- [x] 1.2 Confirm the two crons do not overlap (no day matches both) so Monday fires
   exactly once.
 
 ## 2. Monday-Only Email/Commit Gate
 
-- [ ] 2.1 In the `Prepare and send weekly email report` step, change the `if:` from
+- [x] 2.1 In the `Prepare and send weekly email report` step, change the `if:` from
   `${{ vars.BEATS_CVE_TEST_EMAIL != '' || github.event_name == 'schedule' }}` to
   `${{ github.event.schedule == '0 10 * * 1' || vars.BEATS_CVE_TEST_EMAIL != '' }}`.
-- [ ] 2.2 Apply the identical `if:` change to the `Send email to Elastic` step.
-- [ ] 2.3 Confirm the cron string in both `if:` expressions matches the Monday
+- [x] 2.2 Apply the identical `if:` change to the `Send email to Elastic` step.
+- [x] 2.3 Confirm the cron string in both `if:` expressions matches the Monday
   `schedule` entry from task 1.1 character-for-character.
 
 ## 3. Sanity Checks
 
-- [ ] 3.1 Lint/parse the workflow YAML (e.g. `actionlint .github/workflows/build.yml`
+- [x] 3.1 Lint/parse the workflow YAML (e.g. `actionlint .github/workflows/build.yml`
   or a YAML parser) to confirm it is well-formed.
-- [ ] 3.2 Re-read the `build` and `beats-cve-report` jobs to confirm nothing else
+- [x] 3.2 Re-read the `build` and `beats-cve-report` jobs to confirm nothing else
   gates on `github.event_name == 'schedule'` (so daily build/scan/artifact still run
   every day and only email + commit are Monday-gated).
 
