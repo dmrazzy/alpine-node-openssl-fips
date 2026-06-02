@@ -3,9 +3,11 @@
 ### Requirement: Trigger Gating
 The email and cve-reports branch commit steps SHALL only execute on the weekly
 Monday scheduled run (the cron `'0 10 * * 1'`), or when the repository variable
-BEATS_CVE_TEST_EMAIL is set (test mode). Non-Monday scheduled runs (the cron
-`'0 10 * * 0,2-6'`), workflow_dispatch, and push triggers SHALL skip these steps
-unless BEATS_CVE_TEST_EMAIL is set. The gate SHALL be expressed as
+BEATS_CVE_TEST_EMAIL is set on a trigger where the beats-cve-report job runs
+(test mode). Non-Monday scheduled runs (the cron `'0 10 * * 0,2-6'`),
+workflow_dispatch, and push triggers SHALL skip these steps unless
+BEATS_CVE_TEST_EMAIL is set. Pull requests remain excluded because the
+beats-cve-report job is skipped for pull_request events. The gate SHALL be expressed as
 `github.event.schedule == '0 10 * * 1'` rather than
 `github.event_name == 'schedule'`, because the workflow now runs on a daily
 schedule and only the Monday run is the weekly report.
@@ -23,5 +25,5 @@ schedule and only the Monday run is the weekly report.
 - **THEN** the email and branch-commit steps are skipped without error
 
 #### Scenario: Test mode
-- **WHEN** BEATS_CVE_TEST_EMAIL is set on any trigger
+- **WHEN** BEATS_CVE_TEST_EMAIL is set on a non-pull_request trigger where the beats-cve-report job runs
 - **THEN** the email step executes and sends to the address in BEATS_CVE_TEST_EMAIL
