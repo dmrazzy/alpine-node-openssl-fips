@@ -36,11 +36,11 @@ secret, or repository-variable changes are required.
 
 ## 4. Verification
 
-- [ ] 4.1 Trigger a `workflow_dispatch` run with `BEATS_CVE_TEST_EMAIL` **set** to your
+- [x] 4.1 Trigger a `workflow_dispatch` run with `BEATS_CVE_TEST_EMAIL` **set** to your
   own address. Verify: image builds/pushes, the `beats-cve-report` artifact uploads,
   the test email arrives, and a `-run-N` report is committed to the `cve-reports`
   branch (test-mode path unchanged by this change).
-- [ ] 4.2 Trigger a `workflow_dispatch` run with `BEATS_CVE_TEST_EMAIL` **unset**.
+- [x] 4.2 Trigger a `workflow_dispatch` run with `BEATS_CVE_TEST_EMAIL` **unset**.
   Verify the build + artifact still happen and the email + `cve-reports` commit are
   skipped without error.
 - [ ] 4.3 Confirm the schedule on GitHub: the next scheduled runs appear daily (not
