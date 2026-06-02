@@ -1,0 +1,61 @@
+schema: spec-driven
+
+# Project context — injected into the AI prompt for EVERY artifact.
+context: |
+  Project: alpine-node-openssl-fips — a single Docker base image (Alpine 3.23 +
+  Node 24 + a from-source FIPS-enabled OpenSSL 3.5.x + Elastic filebeat/metricbeat).
+  It is the base layer for FISMA-moderate IZ Gateway services that need a FIPS
+  crypto module.
+
+  There is NO application code. The artifacts in this repo are: the `Dockerfile`,
+  GitHub Actions workflows in `.github/workflows/` (`build.yml`, `build-snapshot.yml`,
+  `build-snapshot-placeholder.yml`), and the bash + jq scripts in `.github/scripts/`
+  (`inspector-report.jq`, `beats-cve-diff.sh`, `beats-cve-email.sh`). OpenSpec changes
+  here describe CI/CD and image-build behavior, NOT product features.
+
+  Tech & tooling: Dockerfile (multi-stage), GitHub Actions YAML, POSIX bash, jq, AWS
+  ECR + Inspector enhanced scanning, ghcr.io, Elastic artifact CDNs. No test suite,
+  no linter, no package.json — the only "test" is that `docker build` succeeds and
+  `openssl list -providers` shows the FIPS provider loaded.
+
+  Three existing capabilities document the CVE pipeline: `daily-cve-scan`,
+  `weekly-email-report`, `cve-reports-branch`. New work usually extends these.
+
+  Conventions that affect proposals/specs/tasks:
+  - Component versions (OpenSSL 3.5.x, Beats) are resolved from upstream APIs at build
+    time. Do NOT hard-code versions unless pinning IS the goal; the Dockerfile fallback
+    constants exist only for API outages.
+  - `cve-reports` and `cve-reports-snapshot` are orphan branches holding only report
+    files; every commit to them carries `[skip ci]`. Dated reports are immutable;
+    only `*-latest.*` is overwritten.
+  - Email + report-commit steps run only when `github.event_name == 'schedule'` OR the
+    repo variable `BEATS_CVE_TEST_EMAIL` is set (the manual dry-run path).
+  - Work ties to a Jira ticket of the form `IGDD-NNNN`.
+
+# Per-artifact rules — injected ONLY when generating that artifact.
+rules:
+  proposal:
+    - Frame the change in terms of CI/CD or image-build behavior, not application features.
+    - Reference the concrete files/jobs affected (e.g. build.yml, a named job/step, a
+      script in .github/scripts/, the Dockerfile stage).
+    - Include an "Out of Scope" section and the relevant Jira ticket (IGDD-NNNN).
+    - Call out impact on the orphan report branches, email gating, or upstream-version
+      resolution when the change touches any of them.
+  specs:
+    - Use "### Requirement:" headings with normative SHALL/SHALL NOT language, each
+      followed by one or more "#### Scenario:" blocks in WHEN/THEN form.
+    - Name the actual workflow job/step, script, or Dockerfile behavior the requirement
+      governs (e.g. the beats-cve-report job, the enhanced-scan poll, the filePath filter).
+    - Include scenarios for the skip/guard paths (PR events, failed/skipped build,
+      missing baseline, timeout, duplicate-date) — not just the happy path.
+  design:
+    - Only needed when the change has real trade-offs (new external dependency, branch
+      strategy, polling/timeout tuning, secret handling). Skip for mechanical edits.
+    - Document why over what; note alternatives considered and any security implications.
+  tasks:
+    - Use checkbox lists grouped by phase; order tasks within a group.
+    - Separate one-time setup (repo secrets/variables, orphan branch creation) from
+      workflow/script edits so it is not repeated on later runs.
+    - End with a Verification group describing the exact dispatch/inputs to run and the
+      observable outcomes to confirm (artifacts present, email content, branch commits).
+    - Remember `[skip ci]` on any commit to a report branch.
