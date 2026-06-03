@@ -2,7 +2,8 @@ name: Docker Build
 
 on:
   schedule:
-    - cron: '0 10 * * 1' # Run weekly on Monday at 10am UTC
+    - cron: '0 10 * * 1'      # Monday 10:00 UTC — build + scan + weekly Elastic email
+    - cron: '0 10 * * 0,2-6'  # Sun, Tue–Sat 10:00 UTC — build + scan only
 
   push:
     branches: 
@@ -212,7 +213,7 @@ jobs:
           beats-cve-filtered.csv
 
     - name: Prepare and send weekly email report
-      if: ${{ vars.BEATS_CVE_TEST_EMAIL != '' || github.event_name == 'schedule' }}
+      if: ${{ github.event.schedule == '0 10 * * 1' || vars.BEATS_CVE_TEST_EMAIL != '' }}
       run: |
         REPORT_DATE=$(date +%Y-%m-%d)
         echo "REPORT_DATE=$REPORT_DATE" >> $GITHUB_ENV
@@ -283,7 +284,7 @@ jobs:
         cd ..
 
     - name: Send email to Elastic
-      if: ${{ vars.BEATS_CVE_TEST_EMAIL != '' || github.event_name == 'schedule' }}
+      if: ${{ github.event.schedule == '0 10 * * 1' || vars.BEATS_CVE_TEST_EMAIL != '' }}
       uses: dawidd6/action-send-mail@v17
       with:
         server_address: email-smtp.us-east-1.amazonaws.com
