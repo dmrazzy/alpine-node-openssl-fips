@@ -27,7 +27,7 @@ jobs:
 
     steps:
     - name: Checkout the software
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Restore Docker build cache
       uses: actions/cache@v5
@@ -142,7 +142,7 @@ jobs:
 
     steps:
     - name: Checkout the software
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v6
