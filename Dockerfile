@@ -1,16 +1,21 @@
 # Dockerfile
 ARG alpineVersion=3.23
-ARG nodeVersion=24
 
 # Stage 1: Build OpenSSL FIPS
 FROM alpine:$alpineVersion AS openssl-build
 
 # Passed in from the workflow; falls back to API fetch if empty.
 ARG OPENSSL_VERSION=""
+ARG APK_INDEX_HASH
 
 ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64
 
-RUN apk update \
+# The echo references APK_INDEX_HASH so Docker invalidates this layer's cache
+# when the Alpine package index changes. Without a reference in the RUN command,
+# Docker ignores ARG changes for cache purposes (invalidation triggers on first
+# usage, not declaration). Do not remove the echo.
+RUN echo "APK index hash: ${APK_INDEX_HASH}" \
+    && apk update \
     && apk upgrade --no-cache \
     && apk add --no-cache bash gcompat libc6-compat curl jq
 
@@ -57,11 +62,18 @@ RUN awk '/^# For FIPS/ { print; system("cat /tmp/openssl_fips_insert.txt"); skip
 # Stage 2: Main image
 FROM alpine:$alpineVersion
 
+ARG APK_INDEX_HASH
+
 ENV OPENSSL_FIPS=1
 ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:/usr/lib/ossl-modules
 
+# The echo references APK_INDEX_HASH so Docker invalidates this layer's cache
+# when the Alpine package index changes. Without a reference in the RUN command,
+# Docker ignores ARG changes for cache purposes (invalidation triggers on first
+# usage, not declaration). Do not remove the echo.
 # Update, upgrade, install packages (including alpine dynamically linked node), and update npm in one layer
-RUN apk update \
+RUN echo "APK index hash: ${APK_INDEX_HASH}" \
+    && apk update \
     && apk upgrade --no-cache \
     && apk add --no-cache curl logrotate dnsmasq bind-tools>=9.20.23-r0 nginx>=1.28.3-r4 jq bash vim gcompat libc6-compat nodejs npm ca-certificates \ 
     && npm update -g

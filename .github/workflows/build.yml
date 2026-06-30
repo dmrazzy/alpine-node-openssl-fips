@@ -57,15 +57,23 @@ jobs:
         fi
         echo "beats=${BEATS_VERSION}" >> $GITHUB_OUTPUT
 
-        echo "Resolved: Alpine=${ALPINE_VERSION}@${ALPINE_DIGEST}, OpenSSL=${OPENSSL_VERSION}, Beats=${BEATS_VERSION}"
+        # Alpine package index: hash detects any package update (nodejs, nginx, gcc, etc.)
+        APK_INDEX_HASH=$(curl -sL https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/APKINDEX.tar.gz | sha256sum | cut -d' ' -f1)
+        if [ -z "$APK_INDEX_HASH" ]; then
+          echo "WARNING: Failed to fetch Alpine package index hash"
+          APK_INDEX_HASH="unknown"
+        fi
+        echo "apk_index=${APK_INDEX_HASH}" >> $GITHUB_OUTPUT
+
+        echo "Resolved: Alpine=${ALPINE_VERSION}@${ALPINE_DIGEST}, OpenSSL=${OPENSSL_VERSION}, Beats=${BEATS_VERSION}, APK_INDEX=${APK_INDEX_HASH}"
 
     - name: Restore Docker build cache
       uses: actions/cache@v5
       with:
         path: .buildx-cache
-        key: ${{ runner.os }}-buildx-${{ steps.versions.outputs.openssl }}-${{ steps.versions.outputs.beats }}-${{ steps.versions.outputs.alpine_key }}-${{ github.sha }}
+        key: ${{ runner.os }}-buildx-${{ steps.versions.outputs.openssl }}-${{ steps.versions.outputs.beats }}-${{ steps.versions.outputs.apk_index }}-${{ steps.versions.outputs.alpine_key }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-buildx-${{ steps.versions.outputs.openssl }}-${{ steps.versions.outputs.beats }}-${{ steps.versions.outputs.alpine_key }}-
+          ${{ runner.os }}-buildx-${{ steps.versions.outputs.openssl }}-${{ steps.versions.outputs.beats }}-${{ steps.versions.outputs.apk_index }}-${{ steps.versions.outputs.alpine_key }}-
           ${{ runner.os }}-buildx-
 
     - name: Set up Docker Buildx
@@ -107,7 +115,8 @@ jobs:
             --build-arg alpineVersion=${{ steps.versions.outputs.alpine_ref }} \
             --build-arg OPENSSL_VERSION=${{ steps.versions.outputs.openssl }} \
             --build-arg BEATS_VERSION_OVERRIDE=${{ steps.versions.outputs.beats }} \
-            --cache-from=type=local,src=.buildx-cache --cache-to=type=local,dest=.buildx-cache \
+            --build-arg APK_INDEX_HASH=${{ steps.versions.outputs.apk_index }} \
+            --cache-from=type=local,src=.buildx-cache --cache-to=type=local,dest=.buildx-cache,mode=max \
             -t ghcr.io/izgateway/alpine-node-openssl-fips:latest \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:${{github.run_number}} \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
