@@ -6,6 +6,7 @@ FROM alpine:$alpineVersion AS openssl-build
 
 # Passed in from the workflow; falls back to API fetch if empty.
 ARG OPENSSL_VERSION=""
+ARG APK_INDEX_HASH
 
 ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64
 
@@ -55,6 +56,8 @@ RUN awk '/^# For FIPS/ { print; system("cat /tmp/openssl_fips_insert.txt"); skip
     
 # Stage 2: Main image
 FROM alpine:$alpineVersion
+
+ARG APK_INDEX_HASH
 
 ENV OPENSSL_FIPS=1
 ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:/usr/lib/ossl-modules
