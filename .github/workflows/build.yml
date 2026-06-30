@@ -116,7 +116,7 @@ jobs:
             --build-arg OPENSSL_VERSION=${{ steps.versions.outputs.openssl }} \
             --build-arg BEATS_VERSION_OVERRIDE=${{ steps.versions.outputs.beats }} \
             --build-arg APK_INDEX_HASH=${{ steps.versions.outputs.apk_index }} \
-            --cache-from=type=local,src=.buildx-cache --cache-to=type=local,dest=.buildx-cache \
+            --cache-from=type=local,src=.buildx-cache --cache-to=type=local,dest=.buildx-cache,mode=max \
             -t ghcr.io/izgateway/alpine-node-openssl-fips:latest \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:${{github.run_number}} \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
