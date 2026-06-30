@@ -57,15 +57,24 @@ jobs:
         fi
         echo "beats=${BEATS_VERSION}" >> $GITHUB_OUTPUT
 
-        echo "Resolved: Alpine=${ALPINE_VERSION}@${ALPINE_DIGEST}, OpenSSL=${OPENSSL_VERSION}, Beats=${BEATS_VERSION}"
+        # Node: resolve current version packaged in Alpine 3.23
+        NODE_VERSION=$(curl -s "https://pkgs.alpinelinux.org/package/v3.23/main/x86_64/nodejs" \
+          | grep -oP '(?<=<strong>)\d+\.\d+\.\d+(?=-r\d+</strong>)' | head -1)
+        if [ -z "$NODE_VERSION" ]; then
+          echo "WARNING: Failed to fetch Node version from Alpine, using fallback 24.17.0"
+          NODE_VERSION=24.17.0
+        fi
+        echo "node=${NODE_VERSION}" >> $GITHUB_OUTPUT
+
+        echo "Resolved: Alpine=${ALPINE_VERSION}@${ALPINE_DIGEST}, OpenSSL=${OPENSSL_VERSION}, Beats=${BEATS_VERSION}, Node=${NODE_VERSION}"
 
     - name: Restore Docker build cache
       uses: actions/cache@v5
       with:
         path: .buildx-cache
-        key: ${{ runner.os }}-buildx-${{ steps.versions.outputs.openssl }}-${{ steps.versions.outputs.beats }}-${{ steps.versions.outputs.alpine_key }}-${{ github.sha }}
+        key: ${{ runner.os }}-buildx-${{ steps.versions.outputs.openssl }}-${{ steps.versions.outputs.beats }}-${{ steps.versions.outputs.node }}-${{ steps.versions.outputs.alpine_key }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-buildx-${{ steps.versions.outputs.openssl }}-${{ steps.versions.outputs.beats }}-${{ steps.versions.outputs.alpine_key }}-
+          ${{ runner.os }}-buildx-${{ steps.versions.outputs.openssl }}-${{ steps.versions.outputs.beats }}-${{ steps.versions.outputs.node }}-${{ steps.versions.outputs.alpine_key }}-
           ${{ runner.os }}-buildx-
 
     - name: Set up Docker Buildx

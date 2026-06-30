@@ -1,6 +1,5 @@
 # Dockerfile
 ARG alpineVersion=3.23
-ARG nodeVersion=24
 
 # Stage 1: Build OpenSSL FIPS
 FROM alpine:$alpineVersion AS openssl-build
