@@ -10,7 +10,8 @@ ARG APK_INDEX_HASH
 
 ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64
 
-RUN apk update \
+RUN echo "APK index hash: ${APK_INDEX_HASH}" \
+    && apk update \
     && apk upgrade --no-cache \
     && apk add --no-cache bash gcompat libc6-compat curl jq
 
@@ -63,7 +64,8 @@ ENV OPENSSL_FIPS=1
 ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:/usr/lib/ossl-modules
 
 # Update, upgrade, install packages (including alpine dynamically linked node), and update npm in one layer
-RUN apk update \
+RUN echo "APK index hash: ${APK_INDEX_HASH}" \
+    && apk update \
     && apk upgrade --no-cache \
     && apk add --no-cache curl logrotate dnsmasq bind-tools>=9.20.23-r0 nginx>=1.28.3-r4 jq bash vim gcompat libc6-compat nodejs npm ca-certificates \ 
     && npm update -g
