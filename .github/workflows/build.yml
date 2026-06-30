@@ -68,7 +68,7 @@ jobs:
         echo "Resolved: Alpine=${ALPINE_VERSION}@${ALPINE_DIGEST}, OpenSSL=${OPENSSL_VERSION}, Beats=${BEATS_VERSION}, APK_INDEX=${APK_INDEX_HASH}"
 
     - name: Restore Docker build cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: .buildx-cache
         key: ${{ runner.os }}-buildx-${{ steps.versions.outputs.openssl }}-${{ steps.versions.outputs.beats }}-${{ steps.versions.outputs.apk_index }}-${{ steps.versions.outputs.alpine_key }}-${{ github.sha }}
