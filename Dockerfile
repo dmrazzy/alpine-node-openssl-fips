@@ -10,6 +10,10 @@ ARG APK_INDEX_HASH
 
 ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64
 
+# The echo references APK_INDEX_HASH so Docker invalidates this layer's cache
+# when the Alpine package index changes. Without a reference in the RUN command,
+# Docker ignores ARG changes for cache purposes (invalidation triggers on first
+# usage, not declaration). Do not remove the echo.
 RUN echo "APK index hash: ${APK_INDEX_HASH}" \
     && apk update \
     && apk upgrade --no-cache \
@@ -63,6 +67,10 @@ ARG APK_INDEX_HASH
 ENV OPENSSL_FIPS=1
 ENV LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:/usr/lib/ossl-modules
 
+# The echo references APK_INDEX_HASH so Docker invalidates this layer's cache
+# when the Alpine package index changes. Without a reference in the RUN command,
+# Docker ignores ARG changes for cache purposes (invalidation triggers on first
+# usage, not declaration). Do not remove the echo.
 # Update, upgrade, install packages (including alpine dynamically linked node), and update npm in one layer
 RUN echo "APK index hash: ${APK_INDEX_HASH}" \
     && apk update \
